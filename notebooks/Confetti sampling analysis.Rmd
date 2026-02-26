@@ -1,1 +1,35 @@
+---
+title: "Week 1 Confetti Sampling"
+output: html_document
+---
 
+```{r}
+# confetti counts per quadrat
+x <- c(4, 2, 5, 2, 5, 4, 11, 5, 9, 7,
+       2, 1, 7, 1, 17, 3, 17, 3, 0, 9,
+       4, 12, 2, 8, 0, 10, 2, 4, 0, 3)
+
+# number of samples
+length(x)
+
+# histogram
+hist(x)
+abline(v = mean(x), col="red")
+
+# mean
+mean(x)
+
+# variance
+var(x)
+
+# standard deviation
+sd(x)
+
+# total quadrats
+800
+
+# estimated total confetti
+mean(x) * 800
+
+# standard error
+800 * sd(x)/sqrt(30)
