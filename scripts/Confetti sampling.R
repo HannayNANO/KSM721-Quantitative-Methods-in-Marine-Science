@@ -32,6 +32,8 @@ sd_x <- sd(x)
 print(variance_x)
 print(sd_x)
 
+d <- density(x)
+str(d)
 # Density plot
 plot(density(x),
      main = "Probability density function")

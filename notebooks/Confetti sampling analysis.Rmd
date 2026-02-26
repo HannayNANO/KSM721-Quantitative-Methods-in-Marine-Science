@@ -1,35 +1,132 @@
 ---
-title: "Week 1 Confetti Sampling"
+title: "Confetti Quadrat Sampling Analysis"
+author: "Junru Zhao"
+date: "`r Sys.Date()`"
 output: html_document
 ---
 
+#Introduction
+
+This notebook demonstrates how quadrat sampling is used to estimate the total abundance of objects in a large area, and how statistical uncertainty (standard error) arises from sampling variability.
+
+This example simulates ecological field sampling, such as estimating sea urchin or kelp density using quadrats.
+
+
+#Step 1: Raw data from quadrat sampling
+
+Each value represents the number of confetti found in a single 10*10 cm quadrat.
+
 ```{r}
-# confetti counts per quadrat
 x <- c(4, 2, 5, 2, 5, 4, 11, 5, 9, 7,
        2, 1, 7, 1, 17, 3, 17, 3, 0, 9,
        4, 12, 2, 8, 0, 10, 2, 4, 0, 3)
 
-# number of samples
-length(x)
+n <- length(x)
+n
+```
+Interpretation:
 
-# histogram
-hist(x)
-abline(v = mean(x), col="red")
+We sampled 30 quadrats from a large area.
 
-# mean
-mean(x)
 
-# variance
-var(x)
+#Step 2: Visualize distribution
 
-# standard deviation
-sd(x)
+Histogram shows frequency distribution.
+```{r}
+hist(x,xlab = "confetti per quadret", main="histogram of confetti counts", col= "gray" )
+abline(v= mean(x), col="tomato", lwd=2)
+```
+red line is sample mean.
 
-# total quadrats
-800
 
-# estimated total confetti
-mean(x) * 800
+#step 3: probability density modle
+kernel density estimation creates a smooth probability model
+```{r}
+d<- density(x)
+plot(d, main = "probability density function",
+     lwd=2,
+     col= "blue")
+```
+which gives the probability of confetti counts / quadrats
 
-# standard error
-800 * sd(x)/sqrt(30)
+
+#step 4: sample statistics
+```{r}
+mean_x <-mean(x)
+sd_x<- sd(x)
+variance_x <- var(x)
+
+mean_x
+sd_x
+variance_x
+```
+mean_x -> estimated confetti/quadrats
+sd_z -> spatial variability between each quadrats
+variance_x -> squared variability
+
+
+#step 5: estimate total confetti in all area
+total area contains 800 quadrats
+```{r}
+total_quadrats <- 800
+total_estimate <- mean_x * total_quadrats
+total_estimate
+```
+it is more like to time a ratio
+
+
+#Step 6: Standard error of the mean
+Standard error represents uncertainty in the mean estimate.
+
+SE does not describe how much the raw data vary — it describes how much the estimated mean itself would vary if the sampling experiment were repeated.
+If multiple independent teams repeat the same sampling procedure, each team will obtain its own estimate of the total confetti. 
+In this case, the standard error can be directly calculated as the standard deviation of these repeated estimates:
+```{r}
+# Example: total estimates from multiple independent teams
+mean_x <- c(4240, 4160, 5040, 5352, 6213, 6219)
+# Empirical standard error (true definition)
+se_total_empirical <- sd(mean_x)
+se_total_empirical
+```
+This value represents how much the estimated total confetti varies across repeated independent sampling experiments. This is the true frequentist definition of standard error.
+However, in most real-world situations, we only perform the sampling once. 
+We do not have multiple repeated experiments. 
+In this case, statisticians use a mathematical approximation to estimate the standard error of the mean:
+```{r}
+standard_error <- sd_x / sqrt(n)
+standard_error
+```
+
+
+#Step 7: Standard error of total estimate
+Since our final goal is to estimate the total confetti in the entire rectangle, we scale this uncertainty proportionally to the total number of quadrats:
+```{r}
+total_standard_error <- total_quadrats * standard_error
+total_standard_error
+```
+
+
+#Step 8: Final estimate with uncertainty
+```{r}
+lower <- total_estimate - total_standard_error
+upper <- total_estimate + total_standard_error
+
+total_estimate
+lower
+upper
+
+cat("Estimated total confetti:",
+    total_estimate,
+    "+/-",
+    total_standard_error)
+```
+
+
+#Summary:
+With repeated independent sampling:
+Standard error = standard deviation of repeated estimates (empirical definition)
+
+With only a single sampling event:
+Standard error ≈ sd(sample) / sqrt(n) (theoretical approximation)
+
+This approximation allows us to estimate uncertainty even when repeated experiments are not available.
